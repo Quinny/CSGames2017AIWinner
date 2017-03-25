@@ -52,21 +52,21 @@ class Point {
   }
 }
 
-class Pair<F> implements Comparable<Pair<F>> {
-  F first;
-  int second;
+class ScoredMove implements Comparable<ScoredMove> {
+  Point point;
+  int score;
 
-  Pair(F f, int s) {
-    this.first = f;
-    this.second = s;
+  ScoredMove(Point f, int s) {
+    this.point = f;
+    this.score = s;
   }
 
-  public int compareTo(Pair<F> p) {
-    return second - p.second;
+  public int compareTo(ScoredMove p) {
+    return score - p.score;
   }
 
   public String toString() {
-    return "(" + first + "," + second + ")";
+    return "(" + point + "," + score + ")";
   }
 }
 
@@ -81,7 +81,7 @@ public class Client {
   protected String name = "DanglingPointers";
 
   int currentIndex = -1;
-  ArrayList<Pair<Point>> scoredMoves = new ArrayList<>();
+  ArrayList<ScoredMove> scoredMoves = new ArrayList<>();
 
   Socket pingSocket = null;
   PrintWriter socketWriter = null;
@@ -144,10 +144,10 @@ public class Client {
 
   private void recomputePathIfNeeded() {
     if (currentIndex == -1) {
-      scoredMoves = new ArrayList<Pair<Point>>();
+      scoredMoves = new ArrayList<ScoredMove>();
       ArrayList<Point> possibleMoves = ballPoint.getAdjacentPoints();
       for (Point p : possibleMoves) {
-        scoredMoves.add(new Pair<Point>(p, Math.min(goalPoint1.dist(p), goalPoint2.dist(p))));
+        scoredMoves.add(new ScoredMove(p, Math.min(goalPoint1.dist(p), goalPoint2.dist(p))));
       }
       Collections.sort(scoredMoves);
       currentIndex = 0;
@@ -171,7 +171,7 @@ public class Client {
           currentIndex = -1;
           msg = "north";
         } else {
-          msg = scoredMoves.get(currentIndex).first.derivedDir;
+          msg = scoredMoves.get(currentIndex).point.derivedDir;
         }
         sendMessage(msg);
       } else if (server_response.contains("your goal is")) {
