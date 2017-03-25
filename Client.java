@@ -24,27 +24,28 @@ class Point {
     ArrayList<Point> adjacentPoints = new ArrayList<>();
     for (int i = -1; i <= 1; i++) {
       for (int j = -1; j <= 1; j++) {
-        if (i != 0 && j != 0) {
-          Point next = move(i, j);
-          String mod1 = "";
-          String mod2 = "";
-          if (j != 0)
-            mod1 = j == -1 ? "north" : "south";
-          if (i != 0)
-            mod2 = i == -1 ? "west" : "east";
+        if (i == 0 && j == 0)
+          continue;
+        Point next = move(i, j);
+        String mod1 = "";
+        String mod2 = "";
+        if (j != 0)
+          mod1 = j == -1 ? "north" : "south";
+        if (i != 0)
+          mod2 = i == -1 ? "west" : "east";
 
-          next.derivedDir = (mod1 + " " + mod2).trim();
-          adjacentPoints.add(next);
-        }
+        next.derivedDir = (mod1 + " " + mod2).trim();
+        adjacentPoints.add(next);
       }
     }
+    Collections.shuffle(adjacentPoints);
     return adjacentPoints;
   }
 
   int dist(Point p) {
     int dr = p.row - row;
     int dc = p.col - col;
-    return dr * dr + dc * dc;
+    return (int) Math.sqrt(dr * dr + dc * dc);
   }
 
   public String toString() {
@@ -75,7 +76,7 @@ public class Client {
   protected String host;
   protected int port;
   protected List<String> actions = new ArrayList<String>();
-
+  protected HashMap<Point, Integer> saturationMap = new HashMap<>();
   // TODO: fuck with other teams by making our name break shit.
   // Maybe: "ball is at (-1, -1)
   protected String name = "DanglingPointers";
@@ -141,13 +142,21 @@ public class Client {
       sendMessage(name);
     }
   }
+  private int getSaturationScore(Point p, int baseScore) {
+    if ((p.row == 6 || p.row == 8) && Math.abs(p.col - goalPoint1.col) == 1) {
+      // System.out.println("Ball is at: " + ballPoint + " and we expect a corner shot at: " + p);
+      return -1000;
+    }
+    return 0;
+  }
 
   private void recomputePathIfNeeded() {
     if (currentIndex == -1) {
       scoredMoves = new ArrayList<ScoredMove>();
       ArrayList<Point> possibleMoves = ballPoint.getAdjacentPoints();
       for (Point p : possibleMoves) {
-        scoredMoves.add(new ScoredMove(p, Math.min(goalPoint1.dist(p), goalPoint2.dist(p))));
+        int baseScore = Math.min(goalPoint1.dist(p), goalPoint2.dist(p));
+        scoredMoves.add(new ScoredMove(p, baseScore + getSaturationScore(p, baseScore)));
       }
       Collections.sort(scoredMoves);
       currentIndex = 0;
@@ -200,7 +209,7 @@ public class Client {
         ballPoint = new Point(ballRow, ballCol);
 
       } else if (server_response.contains("polarity of the goal has been inverted")) {
-        System.out.println("Poles reversed");
+        invalidateCurrentPath();
         if (goalPoint1.col == -1) {
           goalPoint1 = new Point(6, 15);
           goalPoint2 = new Point(7, 15);
@@ -236,7 +245,11 @@ public class Client {
             if (dir.equals("east"))
               dr = 1;
           }
+          saturationMap.putIfAbsent(ballPoint, 0);
+          saturationMap.put(ballPoint, saturationMap.get(ballPoint) + 1);
           ballPoint = ballPoint.move(dr, dc);
+          saturationMap.putIfAbsent(ballPoint, 0);
+          saturationMap.put(ballPoint, saturationMap.get(ballPoint) + 1);
         }
       } else {
         invalidateCurrentPath();
