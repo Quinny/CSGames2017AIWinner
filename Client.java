@@ -148,7 +148,7 @@ public class Client {
       if (server_response.startsWith(name + " is active player")
           || server_response.startsWith("invalid move")) {
         if (currentIndex == -1) {
-          scoredMoves.clear();
+          scoredMoves = new ArrayList<Pair<Point>>();
           ArrayList<Point> possibleMoves = ballPoint.getAdjacentPoints();
           for (Point p : possibleMoves) {
             scoredMoves.add(new Pair<Point>(p, Math.min(goalPoint1.dist(p), goalPoint2.dist(p))));
@@ -159,11 +159,13 @@ public class Client {
           currentIndex++;
         }
 
-        // for (Pair<Point> fuck : scoredMoves) {
-        //  System.out.println(fuck);
-        //}
-
-        String msg = scoredMoves.get(currentIndex).first.derivedDir;
+        String msg;
+        if (currentIndex >= scoredMoves.size()) {
+          currentIndex = -1;
+          msg = "north";
+        } else {
+          msg = scoredMoves.get(currentIndex).first.derivedDir;
+        }
         sendMessage(msg);
       } else if (server_response.contains("your goal is")) {
         currentIndex = -1;
