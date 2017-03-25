@@ -1,0 +1,53 @@
+Got message: What's your name?
+Sending message: fuckme
+Got message: Welcome, fuckme you're player 1!
+Got message: Game is on - 2
+Game ON
+Got message: ball is at (5, 5) - 4
+Got message: your goal is south - 6
+Got message: fuckyou did go west - 8
+Got message: fuckme is active player - 10
+Sending message: south east
+Got message: fuckme did go south east - 12
+Got message: fuckyou did go west - 14
+Got message: fuckme is active player - 16
+Sending message: south
+Got message: fuckme did go south - 18
+Got message: fuckyou did go north east - 21
+Got message: fuckyou did go south east - 23
+Got message: fuckme is active player - 25
+Sending message: north
+Got message: fuckme did go north - 27
+Got message: fuckyou did go south east - 29
+Got message: fuckme is active player - 31
+Sending message: north west
+Got message: invalid move - 32
+Sending message: south
+Got message: fuckme did go south - 34
+Got message: fuckyou did go north west - 37
+Got message: fuckyou did go east - 41
+Got message: fuckyou did go east - 43
+Got message: fuckme is active player - 45
+Sending message: north west
+Got message: fuckme did go north west - 47
+Got message: fuckyou did go south west - 50
+Got message: fuckyou did go south west - 57
+Got message: fuckme is active player - 59
+Sending message: south west
+Got message: fuckme did go south west - 61
+Got message: fuckyou did go north west - 63
+Got message: fuckme is active player - 65
+Sending message: east
+Got message: fuckme did go east - 67
+Got message: fuckyou did go north east - 69
+Got message: fuckme is active player - 71
+Sending message: south
+Got message: fuckme did go south - 72
+Got message: fuckme is active player - 74
+Sending message: south west
+Got message: invalid move - 75
+Sending message: south east
+Got message: fuckme did go south east - 77
+Got message: fuckyou did go south - 80
+Got message: fuckme won a goal was made - 83
+Game is done
