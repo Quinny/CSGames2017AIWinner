@@ -10,7 +10,7 @@ import java.util.*;
 
 class Point {
   public int row, col;
-
+  public String derivedDir = null;
   Point(int r, int c) {
     this.row = r;
     this.col = c;
@@ -24,15 +24,28 @@ class Point {
     ArrayList<Point> adjacentPoints = new ArrayList<>();
     for (int i = -1; i <= 1; i++) {
       for (int j = -1; j <= 1; j++) {
-        if (i != 0 && j != 0)
-          adjacentPoints.add(move(i, j));
+        if (i != 0 && j != 0) {
+          Point next = move(i, j);
+          String mod1 = "";
+          String mod2 = "";
+          if (j != 0)
+            mod1 = j == -1 ? "north" : "south";
+          if (i != 0)
+            mod2 = i == -1 ? "west" : "east";
+
+          next.derivedDir = (mod1 + " " + mod2).trim();
+          adjacentPoints.add(next);
+        }
       }
     }
     return adjacentPoints;
   }
 
   int dist(Point p) {
-    return Math.abs(p.row - row) + Math.abs(p.col - col);
+    int dr = p.row - row;
+    int dc = p.col - col;
+    return dr * dr + dc * dc;
+    // return Math.abs(p.row - row) + Math.abs(p.col - col);
   }
 
   public String toString() {
@@ -67,6 +80,9 @@ public class Client {
   // TODO: fuck with other teams by making our name break shit.
   // Maybe: "ball is at (-1, -1)
   protected String name = "DanglingPointers";
+
+  int currentIndex = -1;
+  ArrayList<Pair<Point>> scoredMoves = new ArrayList<>();
 
   Socket pingSocket = null;
   PrintWriter socketWriter = null;
@@ -132,20 +148,26 @@ public class Client {
       String server_response = getMessage();
       if (server_response.startsWith(name + " is active player")
           || server_response.startsWith("invalid move")) {
-        ArrayList<Point> possibleMoves = ballPoint.getAdjacentPoints();
-        ArrayList<Pair<Point>> scoredMoves = new ArrayList<>();
-        for (Point p : possibleMoves) {
-          scoredMoves.add(new Pair<Point>(p, Math.min(goalPoint1.dist(p), goalPoint2.dist(p))));
+        if (currentIndex == -1) {
+          scoredMoves.clear();
+          ArrayList<Point> possibleMoves = ballPoint.getAdjacentPoints();
+          for (Point p : possibleMoves) {
+            scoredMoves.add(new Pair<Point>(p, Math.min(goalPoint1.dist(p), goalPoint2.dist(p))));
+          }
+          Collections.sort(scoredMoves);
+          currentIndex = 0;
+        } else {
+          currentIndex++;
         }
 
-        Collections.sort(scoredMoves);
         for (Pair<Point> fuck : scoredMoves) {
           System.out.println(fuck);
         }
 
-        String msg = actions.get(randomGenerator.nextInt(actions.size()));
+        String msg = scoredMoves.get(currentIndex).first.derivedDir;
         sendMessage(msg);
       } else if (server_response.contains("your goal is")) {
+        currentIndex = -1;
         String[] tokens = server_response.split(" ");
         String side = tokens[tokens.length - 3];
 
@@ -157,6 +179,7 @@ public class Client {
           goalPoint2 = new Point(5, 11);
         }
       } else if (server_response.startsWith("ball is at")) {
+        currentIndex = -1;
         String[] tokens = server_response.split(" ");
         int nTokens = tokens.length;
 
@@ -169,12 +192,15 @@ public class Client {
 
         System.out.println("Ball is at " + ballRow + "," + ballCol);
       } else if (server_response.startsWith("Game is on")) {
+        currentIndex = -1;
         System.out.println("Game ON");
       } else if (server_response.contains("won a goal was made")
           || server_response.contains("checkmate")) {
+        currentIndex = -1;
         System.out.println("Game is done");
         break;
       } else if (server_response.contains(" did go ")) {
+        currentIndex = -1;
         String[] tokens = server_response.split(" ");
         int nTokens = tokens.length;
         int dr = 0, dc = 0;
@@ -197,6 +223,8 @@ public class Client {
 
           System.out.println("We think the ball is at: " + ballPoint);
         }
+      } else {
+        currentIndex = -1;
       }
     }
 
