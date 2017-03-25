@@ -45,7 +45,6 @@ class Point {
     int dr = p.row - row;
     int dc = p.col - col;
     return dr * dr + dc * dc;
-    // return Math.abs(p.row - row) + Math.abs(p.col - col);
   }
 
   public String toString() {
@@ -122,13 +121,13 @@ public class Client {
   }
 
   public void sendMessage(String msg) {
-    System.out.println("Sending message: " + msg);
+    // System.out.println("Sending message: " + msg);
     socketWriter.println(msg + "\r");
   }
 
   public String getMessage() throws IOException {
     String msg = inputReader.readLine();
-    System.out.println("Got message: " + msg);
+    // System.out.println("Got message: " + msg);
     return msg;
   }
 
@@ -160,9 +159,9 @@ public class Client {
           currentIndex++;
         }
 
-        for (Pair<Point> fuck : scoredMoves) {
-          System.out.println(fuck);
-        }
+        // for (Pair<Point> fuck : scoredMoves) {
+        //  System.out.println(fuck);
+        //}
 
         String msg = scoredMoves.get(currentIndex).first.derivedDir;
         sendMessage(msg);
@@ -190,7 +189,7 @@ public class Client {
         int ballCol = Integer.parseInt(col.substring(0, col.length() - 1));
         ballPoint = new Point(ballRow, ballCol);
 
-        System.out.println("Ball is at " + ballRow + "," + ballCol);
+        // System.out.println("Ball is at " + ballRow + "," + ballCol);
       } else if (server_response.startsWith("Game is on")) {
         currentIndex = -1;
         System.out.println("Game ON");
@@ -221,7 +220,7 @@ public class Client {
           }
           ballPoint = ballPoint.move(dr, dc);
 
-          System.out.println("We think the ball is at: " + ballPoint);
+          // System.out.println("We think the ball is at: " + ballPoint);
         }
       } else {
         currentIndex = -1;
