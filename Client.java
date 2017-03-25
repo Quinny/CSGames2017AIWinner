@@ -142,23 +142,30 @@ public class Client {
     }
   }
 
+  private void recomputePathIfNeeded() {
+    if (currentIndex == -1) {
+      scoredMoves = new ArrayList<Pair<Point>>();
+      ArrayList<Point> possibleMoves = ballPoint.getAdjacentPoints();
+      for (Point p : possibleMoves) {
+        scoredMoves.add(new Pair<Point>(p, Math.min(goalPoint1.dist(p), goalPoint2.dist(p))));
+      }
+      Collections.sort(scoredMoves);
+      currentIndex = 0;
+    } else {
+      currentIndex++;
+    }
+  }
+
+  private void invalidateCurrentPath() {
+    currentIndex = -1;
+  }
+
   private void play_game() throws IOException {
     while (true) {
       String server_response = getMessage();
       if (server_response.startsWith(name + " is active player")
           || server_response.startsWith("invalid move")) {
-        if (currentIndex == -1) {
-          scoredMoves = new ArrayList<Pair<Point>>();
-          ArrayList<Point> possibleMoves = ballPoint.getAdjacentPoints();
-          for (Point p : possibleMoves) {
-            scoredMoves.add(new Pair<Point>(p, Math.min(goalPoint1.dist(p), goalPoint2.dist(p))));
-          }
-          Collections.sort(scoredMoves);
-          currentIndex = 0;
-        } else {
-          currentIndex++;
-        }
-
+        recomputePathIfNeeded();
         String msg;
         if (currentIndex >= scoredMoves.size()) {
           currentIndex = -1;
@@ -168,7 +175,7 @@ public class Client {
         }
         sendMessage(msg);
       } else if (server_response.contains("your goal is")) {
-        currentIndex = -1;
+        invalidateCurrentPath();
         String[] tokens = server_response.split(" ");
         String side = tokens[tokens.length - 3];
 
@@ -180,7 +187,7 @@ public class Client {
           goalPoint2 = new Point(5, 11);
         }
       } else if (server_response.startsWith("ball is at")) {
-        currentIndex = -1;
+        invalidateCurrentPath();
         String[] tokens = server_response.split(" ");
         int nTokens = tokens.length;
 
@@ -193,15 +200,15 @@ public class Client {
 
         // System.out.println("Ball is at " + ballRow + "," + ballCol);
       } else if (server_response.startsWith("Game is on")) {
-        currentIndex = -1;
+        invalidateCurrentPath();
         System.out.println("Game ON");
       } else if (server_response.contains("won a goal was made")
           || server_response.contains("checkmate")) {
-        currentIndex = -1;
+        invalidateCurrentPath();
         System.out.println("Game is done");
         break;
       } else if (server_response.contains(" did go ")) {
-        currentIndex = -1;
+        invalidateCurrentPath();
         String[] tokens = server_response.split(" ");
         int nTokens = tokens.length;
         int dr = 0, dc = 0;
@@ -221,11 +228,9 @@ public class Client {
               dr = 1;
           }
           ballPoint = ballPoint.move(dr, dc);
-
-          // System.out.println("We think the ball is at: " + ballPoint);
         }
       } else {
-        currentIndex = -1;
+        invalidateCurrentPath();
       }
     }
 
