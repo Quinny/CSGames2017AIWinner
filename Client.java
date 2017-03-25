@@ -163,6 +163,7 @@ public class Client {
   private void play_game() throws IOException {
     while (true) {
       String server_response = getMessage();
+
       if (server_response.startsWith(name + " is active player")
           || server_response.startsWith("invalid move")) {
         recomputePathIfNeeded();
@@ -180,11 +181,11 @@ public class Client {
         String side = tokens[tokens.length - 3];
 
         if (side.equals("north")) {
-          goalPoint1 = new Point(4, -1);
-          goalPoint2 = new Point(5, -1);
+          goalPoint1 = new Point(6, -1);
+          goalPoint2 = new Point(7, -1);
         } else {
-          goalPoint1 = new Point(4, 11);
-          goalPoint2 = new Point(5, 11);
+          goalPoint1 = new Point(6, 15);
+          goalPoint2 = new Point(7, 15);
         }
       } else if (server_response.startsWith("ball is at")) {
         invalidateCurrentPath();
@@ -198,7 +199,15 @@ public class Client {
         int ballCol = Integer.parseInt(col.substring(0, col.length() - 1));
         ballPoint = new Point(ballRow, ballCol);
 
-        // System.out.println("Ball is at " + ballRow + "," + ballCol);
+      } else if (server_response.contains("polarity of the goal has been inverted")) {
+        System.out.println("Poles reversed");
+        if (goalPoint1.col == -1) {
+          goalPoint1 = new Point(6, 15);
+          goalPoint2 = new Point(7, 15);
+        } else {
+          goalPoint1 = new Point(6, -1);
+          goalPoint2 = new Point(7, -1);
+        }
       } else if (server_response.startsWith("Game is on")) {
         invalidateCurrentPath();
         System.out.println("Game ON");
