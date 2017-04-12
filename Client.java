@@ -8,18 +8,23 @@ import java.util.List;
 import java.util.Random;
 import java.util.*;
 
+// Represents a point on the game board.
 class Point {
   public int row, col;
+  // Only set on points generated from getAdjacentPoints.  Contains the
+  // direction relative to the source point.
   public String derivedDir = null;
   Point(int r, int c) {
     this.row = r;
     this.col = c;
   }
 
+  // Returns a new point translated by the provided deltas.
   Point move(int dr, int dc) {
     return new Point(row + dr, col + dc);
   }
 
+  // Get all 8 points adjacent to this point, and set the derived directions.
   ArrayList<Point> getAdjacentPoints() {
     ArrayList<Point> adjacentPoints = new ArrayList<>();
     for (int i = -1; i <= 1; i++) {
@@ -38,10 +43,15 @@ class Point {
         adjacentPoints.add(next);
       }
     }
+
+    // Shuffle to remove any directional bias that may come with how we populate
+    // the array list.
     Collections.shuffle(adjacentPoints);
     return adjacentPoints;
   }
 
+  // Euclidean distance to the provided point.  It is key to use Euclidean here
+  // as the agent is allowed to move diagonally.
   int dist(Point p) {
     int dr = p.row - row;
     int dc = p.col - col;
@@ -53,6 +63,8 @@ class Point {
   }
 }
 
+// A move with an associated heuristic score.  A lower score implies a better
+// move.
 class ScoredMove implements Comparable<ScoredMove> {
   Point point;
   int score;
@@ -62,6 +74,7 @@ class ScoredMove implements Comparable<ScoredMove> {
     this.score = s;
   }
 
+  // Compare strictly on score.
   public int compareTo(ScoredMove p) {
     return score - p.score;
   }
@@ -143,6 +156,7 @@ public class Client {
     }
   }
   private int getSaturationScore(Point p, int baseScore) {
+    // ALWAYS take the post bank shot.
     if ((p.row == 6 || p.row == 8) && Math.abs(p.col - goalPoint1.col) == 1) {
       // System.out.println("Ball is at: " + ballPoint + " and we expect a corner shot at: " + p);
       return -1000;
@@ -150,6 +164,9 @@ public class Client {
     return 0;
   }
 
+  // Recomputes the path if needed.  Instead of keeping the state of the game to
+  // determine if a move is legal, we just try all moves in sorted order until
+  // we hit a legal one.
   private void recomputePathIfNeeded() {
     if (currentIndex == -1) {
       scoredMoves = new ArrayList<ScoredMove>();
