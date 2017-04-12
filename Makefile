@@ -2,5 +2,5 @@ all:
 	javac Client.java
 
 run: all
-	java Client fucker &
-	java Client fucker2 > /dev/null
+	java Client player1 &
+	java Client player2 > /dev/null
