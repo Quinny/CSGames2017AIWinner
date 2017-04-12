@@ -1,0 +1,3 @@
+[submodule "csgames_2017_ai"]
+	path = csgames_2017_ai
+	url = https://github.com/Marx314/csgames_2017_ai
